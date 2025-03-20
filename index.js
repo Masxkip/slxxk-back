@@ -17,13 +17,7 @@ const app = express();
 
 app.use(express.json());
 
-app.use(
-    cors({
-      origin: "http://localhost:5173", // Allow frontend requests
-      methods: "GET,POST,PUT,DELETE",
-      credentials: true,
-    })
-  );
+app.use(cors({ origin: "https://your-frontend.vercel.app", credentials: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -49,12 +43,6 @@ app.get("/api/protected", verifyToken, (req, res) => {
     res.json({ message: "You are authorized!", user: req.user });
 });
 
-
-const corsOptions = {
-    origin: ["http://localhost:3000"], // Allow only frontend requests
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true
-};
 
 
 const PORT = process.env.PORT || 5000;

@@ -65,11 +65,15 @@ router.get("/", async (req, res) => {
     }
 
     const posts = await Post.find(query).populate("author", "username email");
-    if (!posts.length) {
-      return res.status(404).json({ message: "No posts found" });
+
+    // ✅ Fix: Ensure it always returns an array
+    if (!Array.isArray(posts)) {
+      return res.status(500).json({ error: "Unexpected response format" });
     }
+
     res.status(200).json(posts);
   } catch (error) {
+    console.error("Error fetching posts:", error);
     res.status(500).json({ error: error.message });
   }
 });
