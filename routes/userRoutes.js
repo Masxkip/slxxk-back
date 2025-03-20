@@ -1,5 +1,5 @@
 const express = require("express");
-const User = require("../models/User");
+const User = require("../models/user");
 const Post = require("../models/Post");
 const verifyToken = require("../middleware/authMiddleware");
 const multer = require("multer");
