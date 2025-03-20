@@ -48,12 +48,6 @@ app.get("/api/protected", verifyToken, (req, res) => {
 });
 
 
-const corsOptions = {
-    origin: ["http://localhost:3000"], // Allow only frontend requests
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true
-};
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
