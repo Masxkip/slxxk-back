@@ -176,7 +176,19 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
   
 
 
-
+  // ✅ Check if user rated post
+  router.get("/:id/my-rating", verifyToken, async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+      if (!post) return res.status(404).json({ message: "Post not found." });
+  
+      const userRating = post.ratings.find((r) => r.user.toString() === req.user.id);
+  
+      res.status(200).json({ rating: userRating ? userRating.rating : null });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 
   
   
