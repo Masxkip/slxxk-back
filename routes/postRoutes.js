@@ -30,11 +30,12 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
     const newPost = new Post({
       title,
       content,
-      category, // 🔹 Save category
+      category,
       author: req.user.id,
-      image: req.files["image"] ? `http://localhost:5000/uploads/${req.files["image"][0].filename}` : null,
-      music: req.files["music"] ? `http://localhost:5000/uploads/music/${req.files["music"][0].filename}` : null
-    });
+      image: req.files["image"] ? `/uploads/${req.files["image"][0].filename}` : null,
+      music: req.files["music"] ? `/uploads/music/${req.files["music"][0].filename}` : null
+  });
+  
 
     await newPost.save();
     res.status(201).json({ message: "Post created successfully!", post: newPost });

@@ -98,8 +98,9 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
         let updateData = { username, bio, location, website };
 
         if (req.file) {
-            updateData.profilePicture = `http://localhost:5000/uploads/${req.file.filename}`;
+            updateData.profilePicture = `/uploads/${req.file.filename}`; // Store relative path
         }
+        
 
         const updatedUser = await User.findByIdAndUpdate(req.params.id, { $set: updateData }, { new: true }).select("-password");
 
