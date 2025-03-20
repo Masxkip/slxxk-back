@@ -9,6 +9,16 @@ const ReplySchema = new mongoose.Schema(
   }
 );
 
+// ✅ Define Comment Schema (Now includes replies)
+const CommentSchema = new mongoose.Schema(
+  {
+    text: { type: String, required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    replies: [ReplySchema], // Replies array inside each comment
+    createdAt: { type: Date, default: Date.now },
+  }
+);
+
 
 
 // ✅ Define Post Schema
