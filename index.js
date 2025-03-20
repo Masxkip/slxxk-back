@@ -17,13 +17,11 @@ const app = express();
 
 app.use(express.json());
 
-app.use(
-    cors({
-      origin: "http://localhost:5173", // Allow frontend requests
-      methods: "GET,POST,PUT,DELETE",
-      credentials: true,
-    })
-  );
+app.use(cors({
+    origin: 'https://your-frontend.vercel.app', // Allow only your Vercel frontend
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+}));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
