@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/sendResetEmail");
@@ -16,7 +16,7 @@ router.post("/register", async (req, res) => {
         if (existingUser) return res.status(400).json({ message: "User already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, email, password: hashedPassword });
+        const newUser = new user({ username, email, password: hashedPassword });
         await newUser.save();
 
         res.status(201).json({ message: "User registered successfully!" });
