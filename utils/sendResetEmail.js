@@ -13,7 +13,8 @@ const sendResetEmail = async (userEmail, resetToken) => {
       },
     });
 
-    const resetURL = `https://slxxk.vercel.app/reset-password/${resetToken}`;
+    const resetURL = `https://slxxk.com/reset-password/${resetToken}`;
+
 
     const mailOptions = {
       from: process.env.EMAIL_FROM,
