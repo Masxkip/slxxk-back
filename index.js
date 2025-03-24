@@ -18,10 +18,11 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: 'https://slxxk.vercel.app', // Allow only your Vercel frontend
+    origin: ['https://slxxk.com', 'https://www.slxxk.com', 'https://slxxk.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
-}));
+  }));
+  
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
