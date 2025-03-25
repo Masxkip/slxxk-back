@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Fetch user profile along with posts, comments, replies, and ratings
+// Fetch user profile along with posts, comments, replies, and ratings
 router.get("/:id", async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select("-password");
@@ -86,7 +86,7 @@ router.get("/:id", async (req, res) => {
 
 
 
-// ✅ Update user profile
+// Update user profile
 router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) => {
     if (req.user.id !== req.params.id) {
         return res.status(403).json({ message: "Unauthorized: You can only update your own profile" });

@@ -1,13 +1,13 @@
-const fs = require("fs"); // ✅ Import file system module
+const fs = require("fs"); // Import file system module
 const multer = require("multer");
 const path = require("path");
 
-// ✅ Ensure uploads/music/ directory exists before saving files
+// Ensure uploads/music/ directory exists before saving files
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = path.join(__dirname, "../uploads/music/");
         
-        // ✅ Check if directory exists, if not, create it
+        // Check if directory exists, if not, create it
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -19,7 +19,8 @@ const storage = multer.diskStorage({
     }
 });
 
-// ✅ File Filter to Allow Only MP3 Files
+
+// File Filter to Allow Only MP3 Files
 const fileFilter = (req, file, cb) => {
     console.log("🔍 File MIME Type Detected:", file.mimetype);
 

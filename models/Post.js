@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// ✅ Define Reply Schema
+// Define Reply Schema
 const ReplySchema = new mongoose.Schema(
   {
     text: { type: String, required: true },
@@ -9,33 +9,33 @@ const ReplySchema = new mongoose.Schema(
   }
 );
 
-// ✅ Define Comment Schema (Now includes replies)
+// Define Comment Schema (Now includes replies)
 const CommentSchema = new mongoose.Schema(
   {
     text: { type: String, required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    replies: [ReplySchema], // Replies array inside each comment
+    replies: [ReplySchema],
     createdAt: { type: Date, default: Date.now },
   }
 );
 
 
 
-// ✅ Define Post Schema
+// Define Post Schema
 const PostSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     content: { type: String, required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     image: { type: String },
-    music: { type: String }, // ✅ New field to store music file URL
-    category: { type: String, required: true }, // 🔹 Ensure category is saved
+    music: { type: String },
+    category: { type: String, required: true },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comments: [CommentSchema], // Add comments array
+    comments: [CommentSchema],
     ratings: [
       {
-          user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Stores who rated
-          rating: { type: Number, required: true } // ✅ Stores the rating (1-5)
+          user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Stores who rated
+          rating: { type: Number, required: true } // Stores the rating (1-5)
       }
   ]
   },

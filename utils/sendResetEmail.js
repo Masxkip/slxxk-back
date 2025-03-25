@@ -6,7 +6,7 @@ const sendResetEmail = async (userEmail, resetToken) => {
     const transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
       port: process.env.EMAIL_PORT,
-      secure: true, // ✅ Use true if using port 465 (recommended by IONOS)
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -30,9 +30,9 @@ const sendResetEmail = async (userEmail, resetToken) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("✅ Password reset email sent successfully.");
+    console.log(" Password reset email sent successfully.");
   } catch (error) {
-    console.error("❌ Error sending password reset email:", error.message);
+    console.error(" Error sending password reset email:", error.message);
   }
 };
 

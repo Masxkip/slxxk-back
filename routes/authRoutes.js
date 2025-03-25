@@ -53,7 +53,7 @@ router.post("/login", async (req, res) => {
 });
 
 
-// ✅ Refresh JWT Token After Profile Update
+// Refresh JWT Token After Profile Update
 router.post("/refresh-token", async (req, res) => {
     try {
         const { userId } = req.body;
@@ -71,7 +71,7 @@ router.post("/refresh-token", async (req, res) => {
 
 
 
-// ✅ 1️⃣ Forgot Password - Send Reset Email
+// Forgot Password - Send Reset Email
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
 
@@ -79,14 +79,14 @@ router.post("/forgot-password", async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: "User not found" });
 
-        // ✅ Generate a secure reset token
+        // Generate a secure reset token
         const resetToken = crypto.randomBytes(32).toString("hex");
         user.resetPasswordToken = resetToken;
         user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
 
         await user.save();
 
-        // ✅ Use sendResetEmail.js
+        // Use sendResetEmail.js
         await sendResetEmail(user.email, resetToken);
 
         res.json({ message: "Password reset email sent!" });
@@ -99,7 +99,7 @@ router.post("/forgot-password", async (req, res) => {
 
 
 
-// ✅ 2️⃣ Reset Password - Update Password
+//  Reset Password - Update Password
 router.post("/reset-password/:token", async (req, res) => {
     const { password } = req.body;
 
@@ -111,20 +111,20 @@ router.post("/reset-password/:token", async (req, res) => {
 
         if (!user) return res.status(400).json({ message: "Invalid or expired token" });
 
-        // ✅ Hash new password before saving
+        //  Hash new password before saving
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // ✅ Use MongoDB `$set` to correctly update the password
+        //  Use MongoDB `$set` to correctly update the password
         await User.updateOne(
             { _id: user._id },
             {
-                $set: { password: hashedPassword }, // ✅ Update password
-                $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 } // ✅ Remove reset token fields
+                $set: { password: hashedPassword }, // Update password
+                $unset: { resetPasswordToken: 1, resetPasswordExpires: 1 } // Remove reset token fields
             }
         );
 
-        res.json({ message: "Password reset successful! You can now log in with your new password." });
+        res.json({ message: "Password reset successful!" });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
