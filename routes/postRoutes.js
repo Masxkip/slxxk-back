@@ -65,7 +65,10 @@ router.get("/", async (req, res) => {
       query.category = category;
     }
 
-    const posts = await Post.find(query).populate("author", "username email");
+    const posts = await Post.find(query)
+  .sort({ createdAt: -1 })
+  .populate("author", "username email");
+
 
     // Fix: Ensure it always returns an array
     if (!Array.isArray(posts)) {
