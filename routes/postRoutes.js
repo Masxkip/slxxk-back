@@ -6,7 +6,7 @@ const multer = require("multer");
 
 const router = express.Router();
 
-// Configure Storage for Post Images & Music
+// ✅ Configure Storage for Post Images & Music
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
       if (file.mimetype.startsWith("audio/")) {
@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Create a new post (Now Includes Category)
+// ✅ Create a new post (Now Includes Category)
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
   const { title, content, category } = req.body;
 
@@ -30,12 +30,11 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
     const newPost = new Post({
       title,
       content,
-      category,
+      category, // 🔹 Save category
       author: req.user.id,
-      image: req.files["image"] ? `/uploads/${req.files["image"][0].filename}` : null,
-      music: req.files["music"] ? `/uploads/music/${req.files["music"][0].filename}` : null
-  });
-  
+      image: req.files["image"] ? `http://localhost:5000/uploads/${req.files["image"][0].filename}` : null,
+      music: req.files["music"] ? `http://localhost:5000/uploads/music/${req.files["music"][0].filename}` : null
+    });
 
     await newPost.save();
     res.status(201).json({ message: "Post created successfully!", post: newPost });
@@ -46,13 +45,13 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
 
 
 
-// Get all posts (Now Supports Category Filtering)
+// ✅ Get all posts (Now Supports Category Filtering)
 router.get("/", async (req, res) => {
   try {
     const { search, category } = req.query;
     let query = {};
 
-    // Search by keyword in title or content
+    // 🔹 Search by keyword in title or content
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -60,17 +59,14 @@ router.get("/", async (req, res) => {
       ];
     }
 
-    // Filter by category
+    // 🔹 Filter by category
     if (category) {
       query.category = category;
     }
 
-    const posts = await Post.find(query)
-  .sort({ createdAt: -1 })
-  .populate("author", "username email");
+    const posts = await Post.find(query).populate("author", "username email");
 
-
-    // Fix: Ensure it always returns an array
+    // ✅ Fix: Ensure it always returns an array
     if (!Array.isArray(posts)) {
       return res.status(500).json({ error: "Unexpected response format" });
     }
@@ -84,20 +80,26 @@ router.get("/", async (req, res) => {
 
 
 
-// Get a single post by ID
+// ✅ Get a single post by ID + increment view count
 router.get("/:id", async (req, res) => {
-    try {
-        const post = await Post.findById(req.params.id).populate("author", "username");
-        if (!post) return res.status(404).json({ message: "Post not found" });
+  try {
+    const post = await Post.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },  // 🔥 This increments the view count
+      { new: true }
+    ).populate("author", "username");
 
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    res.status(200).json(post);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 
-// Update a post (Only the post owner can update)
+
+// ✅ Update a post (Only the post owner can update)
 router.put("/:id", verifyToken, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -119,7 +121,7 @@ router.put("/:id", verifyToken, async (req, res) => {
 
 
 
-// Delete a post (Only the post owner can delete)
+// ✅ Delete a post (Only the post owner can delete)
 router.delete("/:id", verifyToken, async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
@@ -138,7 +140,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
 
 
-// Allow users to rate a post
+// ✅ Allow users to rate a post
 router.post("/:id/rate", verifyToken, async (req, res) => {
     try {
       const { rating } = req.body;
@@ -149,13 +151,13 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
       const post = await Post.findById(req.params.id);
       if (!post) return res.status(404).json({ message: "Post not found." });
   
-      // Check if the user has already rated
+      // ✅ Check if the user has already rated
       const existingRating = post.ratings.find((r) => r.user.toString() === req.user.id);
       if (existingRating) {
         return res.status(400).json({ message: "You have already rated this post." });
       }
   
-      // Add new rating
+      // ✅ Add new rating
       post.ratings.push({ user: req.user.id, rating });
       await post.save();
   
@@ -166,13 +168,13 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
   });
 
 
-// Route to Calculate Average Rating
+// ✅ Route to Calculate Average Rating
   router.get("/:id/ratings", async (req, res) => {
     try {
       const post = await Post.findById(req.params.id);
       if (!post) return res.status(404).json({ message: "Post not found." });
   
-      // Calculate Average Rating
+      // ✅ Calculate Average Rating
       const totalRatings = post.ratings.length;
       const avgRating = totalRatings > 0 ? (post.ratings.reduce((sum, r) => sum + r.rating, 0) / totalRatings).toFixed(1) : 0;
   
@@ -184,7 +186,7 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
   
 
 
-  // Check if user rated post
+  // ✅ Check if user rated post
   router.get("/:id/my-rating", verifyToken, async (req, res) => {
     try {
       const post = await Post.findById(req.params.id);
@@ -198,10 +200,27 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
     }
   });
 
+
+  // ✅ Get trending posts (sorted by views)
+router.get("/trending/posts", async (req, res) => {
+  try {
+    const trendingPosts = await Post.find()
+      .sort({ views: -1 })
+      .limit(5)
+      .populate("author", "username");
+
+    res.status(200).json(trendingPosts);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+  
+
   
   
   
 
 
 
-module.exports = router;
+module.exports = router; // ✅ Ensure we export a Router, not an object
