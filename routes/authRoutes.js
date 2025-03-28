@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
 
 
 // ✅ Confirm Email with Code
-router.post("/confirm-email", async (req, res) => {
+router.post("/verify-email", async (req, res) => {
     const { email, code } = req.body;
   
     try {
@@ -90,7 +90,7 @@ router.post("/resend-code", async (req, res) => {
       await user.save();
   
       // Send new confirmation code via email
-      await sendEmailConfirmation(user.email, newCode);
+      await sendConfirmationEmail(user.email, newCode);
   
       res.status(200).json({ message: "New verification code sent to email." });
     } catch (err) {
