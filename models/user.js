@@ -10,6 +10,11 @@ const UserSchema = new mongoose.Schema({
     resetPasswordExpires: { type: Date, default: null },
     location: { type: String, default: "" },
     website: { type: String, default: "" },
+
+    confirmationCode: { type: String, default: null },
+    confirmationCodeExpires: { type: Date, default: null },
+    isVerified: { type: Boolean, default: false }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", UserSchema);

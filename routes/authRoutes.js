@@ -5,52 +5,127 @@ const User = require("../models/user");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const sendResetEmail = require("../utils/sendResetEmail");
+const sendConfirmationEmail = require("../utils/sendConfirmationEmail");
 
 const router = express.Router();
 
-// Register User
+const sendConfirmationEmail = require("../utils/sendConfirmationEmail"); // ✅ Import
+
+// ✅ Register with Email Confirmation
 router.post("/register", async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-        if (!username || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
-        }
+    // ✅ Generate 6-digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const codeExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ username, email, password: hashedPassword });
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      confirmationCode: code,
+      confirmationCodeExpires: codeExpiry,
+    });
 
-        await newUser.save();
-        res.status(201).json({ message: "User registered successfully!" });
-    } catch (error) {
-        console.error("Registration error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+    await newUser.save();
+
+    // ✅ Send email
+    await sendConfirmationEmail(email, code);
+
+    res.status(201).json({ message: "User registered! Confirmation code sent to email." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 
-// Login User
+// ✅ Confirm Email with Code
+router.post("/confirm-email", async (req, res) => {
+    const { email, code } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+  
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      if (user.isVerified) {
+        return res.status(400).json({ message: "User already verified" });
+      }
+  
+      if (
+        user.confirmationCode !== code ||
+        Date.now() > user.confirmationCodeExpires
+      ) {
+        return res.status(400).json({ message: "Invalid or expired code" });
+      }
+  
+      user.isVerified = true;
+      user.confirmationCode = null;
+      user.confirmationCodeExpires = null;
+      await user.save();
+  
+      res.status(200).json({ message: "Email confirmed successfully!" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+
+
+  // ✅ Resend Confirmation Code
+router.post("/resend-code", async (req, res) => {
+    const { email } = req.body;
+  
+    try {
+      const user = await User.findOne({ email });
+      if (!user) return res.status(404).json({ message: "User not found" });
+      if (user.isVerified) return res.status(400).json({ message: "User already verified" });
+  
+      // Generate a new 6-digit code
+      const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+      user.confirmationCode = newCode;
+      await user.save();
+  
+      // Send new confirmation code via email
+      await sendEmailConfirmation(user.email, newCode);
+  
+      res.status(200).json({ message: "New verification code sent to email." });
+    } catch (err) {
+      res.status(500).json({ message: err.message || "Something went wrong." });
+    }
+  });
+  
+  
+
+
+// ✅ Updated Login Route - Block unverified users
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
+  
     try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: "User not found" });
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        res.status(200).json({ token, user });
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: "User not found" });
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+  
+      if (!user.isVerified) {
+        return res.status(401).json({ message: "Please verify your email before logging in." });
+      }
+  
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  
+      res.status(200).json({ token, user });
     } catch (error) {
-        res.status(500).json({ message: "Server error", error: error.message });
+      res.status(500).json({ message: "Server error", error: error.message });
     }
-});
+  });
+  
 
 
 // Refresh JWT Token After Profile Update
