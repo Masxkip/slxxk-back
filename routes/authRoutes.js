@@ -9,9 +9,7 @@ const sendConfirmationEmail = require("../utils/sendConfirmationEmail");
 
 const router = express.Router();
 
-const sendConfirmationEmail = require("../utils/sendConfirmationEmail"); // ✅ Import
-
-// ✅ Register with Email Confirmation
+// ✅ Register with 
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
