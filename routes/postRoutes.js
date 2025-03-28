@@ -27,13 +27,19 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
   const { title, content, category } = req.body;
 
   try {
+    const baseUrl = req.protocol + "://" + req.get("host"); // ✅ Dynamically get correct base URL
+
     const newPost = new Post({
       title,
       content,
-      category, // 🔹 Save category
+      category,
       author: req.user.id,
-      image: req.files["image"] ? `http://localhost:5000/uploads/${req.files["image"][0].filename}` : null,
-      music: req.files["music"] ? `http://localhost:5000/uploads/music/${req.files["music"][0].filename}` : null
+      image: req.files["image"]
+        ? `${baseUrl}/uploads/${req.files["image"][0].filename}`
+        : null,
+      music: req.files["music"]
+        ? `${baseUrl}/uploads/music/${req.files["music"][0].filename}`
+        : null
     });
 
     await newPost.save();
