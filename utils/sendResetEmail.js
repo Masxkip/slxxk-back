@@ -1,5 +1,9 @@
-require("dotenv").config();
-const nodemailer = require("nodemailer");
+// utils/sendResetEmail.js
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+import nodemailer from 'nodemailer';
 
 const sendResetEmail = async (userEmail, resetToken) => {
   try {
@@ -15,7 +19,6 @@ const sendResetEmail = async (userEmail, resetToken) => {
 
     const resetURL = `https://slxxk.com/reset-password/${resetToken}`;
 
-
     const mailOptions = {
       from: process.env.EMAIL_FROM,
       to: userEmail,
@@ -30,10 +33,10 @@ const sendResetEmail = async (userEmail, resetToken) => {
     };
 
     await transporter.sendMail(mailOptions);
-    console.log(" Password reset email sent successfully.");
+    console.log("✅ Password reset email sent successfully.");
   } catch (error) {
-    console.error(" Error sending password reset email:", error.message);
+    console.error("❌ Error sending password reset email:", error.message);
   }
 };
 
-module.exports = sendResetEmail;
+export default sendResetEmail;

@@ -1,4 +1,6 @@
-const nodemailer = require("nodemailer");
+// utils/sendConfirmationEmail.js
+
+import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -33,4 +35,4 @@ const sendConfirmationEmail = async (email, code) => {
   await transporter.sendMail(mailOptions);
 };
 
-module.exports = sendConfirmationEmail;
+export default sendConfirmationEmail;

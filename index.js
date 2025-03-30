@@ -1,54 +1,64 @@
-require("dotenv").config();
-const User = require("./models/user");
-const mongoose = require("mongoose");
-const express = require("express");
-const cors = require("cors");
-const authRoutes = require("./routes/authRoutes");
-const verifyToken = require("./middleware/authMiddleware");
-const Post = require("./models/Post");
-const postRoutes = require("./routes/postRoutes");
-const userRoutes = require("./routes/userRoutes");
-const commentRoutes = require("./routes/commentRoutes");
+// index.js (ESM version)
+
+import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
 
 
+// Import routes
+import authRoutes from './routes/authRoutes.js';
+import postRoutes from './routes/postRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import commentRoutes from './routes/commentRoutes.js';
+
+import { adminJs, adminRouter } from './admin.js';
+
+// Import middleware
+import verifyToken from './middleware/authMiddleware.js';
 
 const app = express();
-    
 
+// Middleware
 app.use(express.json());
 
 app.use(cors({
-    origin: ['https://slxxk.com', 'https://www.slxxk.com', 'https://slxxk.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-  }));
-  
+  origin: ['https://slxxk.com', 'https://www.slxxk.com', 'https://slxxk.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
+
+
+
+// Static file serving
 app.use("/uploads", express.static("uploads"));
 
-
+// MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
-.then(async () => {
-    console.log("✅ MongoDB Connected Successfully");
+.then(() => {
+  console.log("✅ MongoDB Connected Successfully");
 
-   
+  app.use(adminJs.options.rootPath, adminRouter);
+  console.log("✅ AdminJS mounted at", adminJs.options.rootPath); // Add this
 })
 .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 
-
-
+// Protected test route
 app.get("/api/protected", verifyToken, (req, res) => {
-    res.json({ message: "You are authorized!", user: req.user });
+  res.json({ message: "You are authorized!", user: req.user });
 });
 
-
-
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

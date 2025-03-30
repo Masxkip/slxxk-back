@@ -1,23 +1,21 @@
-const mongoose = require("mongoose");
+// models/Post.js
+
+import mongoose from 'mongoose';
 
 // ✅ Define Reply Schema
-const ReplySchema = new mongoose.Schema(
-  {
-    text: { type: String, required: true },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    createdAt: { type: Date, default: Date.now },
-  }
-);
+const ReplySchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-// ✅ Define Comment Schema (Now includes replies)
-const CommentSchema = new mongoose.Schema(
-  {
-    text: { type: String, required: true },
-    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    replies: [ReplySchema], // Replies array inside each comment
-    createdAt: { type: Date, default: Date.now },
-  }
-);
+// ✅ Define Comment Schema (includes replies)
+const CommentSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  replies: [ReplySchema],
+  createdAt: { type: Date, default: Date.now },
+});
 
 // ✅ Define Post Schema
 const PostSchema = new mongoose.Schema(
@@ -26,22 +24,24 @@ const PostSchema = new mongoose.Schema(
     content: { type: String, required: true },
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     image: { type: String },
-    music: { type: String }, // ✅ New field to store music file URL
-    category: { type: String, required: true }, // 🔹 Ensure category is saved
+    music: { type: String },
+    category: { type: String, required: true },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    comments: [CommentSchema], // Add comments array
+    comments: [CommentSchema],
     views: {
       type: Number,
       default: 0
-    },    
+    },
     ratings: [
       {
-          user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Stores who rated
-          rating: { type: Number, required: true } // ✅ Stores the rating (1-5)
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        rating: { type: Number, required: true }
       }
-  ]
+    ]
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Post", PostSchema);
+// ✅ Export Post model
+const Post = mongoose.model("Post", PostSchema);
+export default Post;
