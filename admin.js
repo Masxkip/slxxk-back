@@ -2,7 +2,7 @@
 
 import AdminJS from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
-import AdminJSMongoose from '@adminjs/mongoose';
+import * as AdminJSMongoose from '@adminjs/mongoose'; // ✅ fixed
 import mongoose from 'mongoose';
 import User from './models/user.js';
 import Post from './models/Post.js';
