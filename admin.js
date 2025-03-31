@@ -60,9 +60,10 @@ const adminJs = new AdminJS({
 
 // ✅ Admin Auth - Basic login setup
 const ADMIN = {
-  email: 'admin@slxxk.com',
-  password: 'admin123', // You can load this securely from .env later
-};
+    email: process.env.ADMIN_EMAIL,
+    password: process.env.ADMIN_PASSWORD,
+  };
+  
 
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
   authenticate: async (email, password) => {
