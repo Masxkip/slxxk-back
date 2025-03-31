@@ -47,33 +47,26 @@ const adminJs = new AdminJS({
               edit: false,
             },
           },
-          'comments': {
-            type: 'mixed',
-            isArray: true,
-            isVisible: { list: false, filter: false, show: true, edit: true },
-          },
-          'comments.text': { type: 'textarea', isVisible: true },
-          'comments.author': {
-            isVisible: true,
-            components: {
-              show: AdminJS.bundle('./components/UserRef.jsx'), // shows username
-            },
-          },
-          'comments.createdAt': { isVisible: true },
-           // ✅ REPLIES section
-      'comments.replies': {
-        type: 'mixed',
-        isArray: true,
-        isVisible: { list: false, filter: false, show: true, edit: true },
+          // ✅ Comment setup
+      'comments': { isVisible: true },
+      'comments.text': { isVisible: true },
+      'comments.author': {
+        isVisible: true,
+        reference: 'User', // 💡 This enables AdminJS's auto-populate
       },
-      'comments.replies.text': { type: 'textarea', isVisible: true },
+      
+          'comments.createdAt': { isVisible: true },
+
+           // ✅ Replies setup
+      'comments.replies': { isVisible: true },
+      'comments.replies.text': { isVisible: true },
       'comments.replies.author': {
         isVisible: true,
-        components: {
-          show: AdminJS.bundle('./components/UserRef.jsx'),
-        },
+        reference: 'User', // 💡 Populate reply author as well
       },
+
       'comments.replies.createdAt': { isVisible: true },
+
       showProperties: [
         'title', 'author', 'category', 'content', 'image', 'music',
         'comments', 'comments.text', 'comments.author', 'comments.createdAt',
