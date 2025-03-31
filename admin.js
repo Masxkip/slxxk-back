@@ -2,17 +2,17 @@
 
 import AdminJS from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
-import * as AdminJSMongoose from '@adminjs/mongoose'; // ✅ fixed
+import * as AdminJSMongoose from '@adminjs/mongoose';
 import mongoose from 'mongoose';
+
 import User from './models/user.js';
 import Post from './models/Post.js';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
-// ✅ Configure AdminJS
 const adminJs = new AdminJS({
-  databases: [mongoose], // You can also list models separately
   rootPath: '/admin',
+  databases: [mongoose],
   resources: [
     {
       resource: User,
@@ -47,7 +47,16 @@ const adminJs = new AdminJS({
               edit: false,
             },
           },
+
+          // 💬 Show Comments + Replies in Show View
+          'comments': {
+            isVisible: { list: false, show: true, edit: false },
+          },
+          'comments.text': { isVisible: false },
+          'comments.author': { isVisible: false },
+          'comments.replies': { isVisible: false },
         },
+        showProperties: ['title', 'author', 'category', 'content', 'image', 'music', 'comments'],
       },
     },
   ],
@@ -58,12 +67,11 @@ const adminJs = new AdminJS({
   },
 });
 
-// ✅ Admin Auth - Basic login setup
+// ✅ Admin Auth (from .env)
 const ADMIN = {
-    email: process.env.ADMIN_EMAIL,
-    password: process.env.ADMIN_PASSWORD,
-  };
-  
+  email: process.env.ADMIN_EMAIL,
+  password: process.env.ADMIN_PASSWORD,
+};
 
 const adminRouter = AdminJSExpress.buildAuthenticatedRouter(adminJs, {
   authenticate: async (email, password) => {
