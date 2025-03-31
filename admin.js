@@ -17,6 +17,26 @@ const adminJs = new AdminJS({
     {
       resource: User,
       options: {
+        actions: {
+          delete: {
+            isVisible: true,
+            handler: async (request, response, context) => {
+              const { record } = context;
+    
+              const user = await User.findById(record.params._id);
+              if (user) await user.remove(); // ✅ This triggers your pre('remove') hook              
+    
+              return {
+                record: record.toJSON(),
+                redirectUrl: context.h.resourceUrl(),
+                notice: {
+                  message: 'User and related posts deleted',
+                  type: 'success',
+                },
+              };
+            },
+          },
+        },
         properties: {
           password: { isVisible: false },
           resetPasswordToken: { isVisible: false },
@@ -26,6 +46,7 @@ const adminJs = new AdminJS({
         },
       },
     },
+    
     {
       resource: Post,
       options: {
