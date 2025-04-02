@@ -24,17 +24,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Create a new post
+// ✅ Create a new post (Now Includes Normalized Category)
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
-  const { title, content, category } = req.body;
+  let { title, content, category } = req.body;
 
   try {
-    const baseUrl = req.protocol + "://" + req.get("host");
+    // ✅ Normalize category
+    if (category) {
+      category = category.trim().toLowerCase().replace(/\s+/g, " ");
+      category = category.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+    }
+
+    const baseUrl = req.protocol + "://" + req.get("host"); // ✅ Dynamically get correct base URL
 
     const newPost = new Post({
       title,
       content,
-      category,
+      category, // ✅ Use the normalized version here
       author: req.user.id,
       image: req.files["image"]
         ? `${baseUrl}/uploads/${req.files["image"][0].filename}`
@@ -50,6 +56,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // ✅ Get all posts with optional filters
 router.get("/", async (req, res) => {
