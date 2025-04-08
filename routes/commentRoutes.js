@@ -1,12 +1,10 @@
-// routes/commentRoutes.js
-
 import express from 'express';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// ✅ Add a new comment
+// Add a new comment
 router.post("/:postId", verifyToken, async (req, res) => {
   const { text } = req.body;
 
@@ -34,7 +32,7 @@ router.post("/:postId", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Add a reply to a comment
+// Add a reply to a comment
 router.post("/:postId/comments/:commentId/reply", verifyToken, async (req, res) => {
   const { text } = req.body;
 
@@ -66,7 +64,7 @@ router.post("/:postId/comments/:commentId/reply", verifyToken, async (req, res) 
   }
 });
 
-// ✅ Edit a comment
+// Edit a comment
 router.put("/:postId/comments/:commentId", verifyToken, async (req, res) => {
   try {
     const { text } = req.body;
@@ -90,7 +88,7 @@ router.put("/:postId/comments/:commentId", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Get all comments for a post
+// Get all comments for a post
 router.get("/:postId/comments", async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId)
@@ -105,7 +103,7 @@ router.get("/:postId/comments", async (req, res) => {
   }
 });
 
-// ✅ Delete a comment
+// Delete a comment
 router.delete("/:postId/comments/:commentId", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -128,7 +126,7 @@ router.delete("/:postId/comments/:commentId", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Delete a reply
+// Delete a reply
 router.delete("/:postId/comments/:commentId/replies/:replyId", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -154,5 +152,5 @@ router.delete("/:postId/comments/:commentId/replies/:replyId", verifyToken, asyn
   }
 });
 
-// ✅ Export router
+// Export router
 export default router;

@@ -1,5 +1,3 @@
-// routes/authRoutes.js
-
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -11,7 +9,7 @@ import sendConfirmationEmail from '../utils/sendConfirmationEmail.js';
 
 const router = express.Router();
 
-// ✅ Register
+// Register
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -40,7 +38,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ✅ Confirm Email
+// Confirm Email
 router.post("/verify-email", async (req, res) => {
   const { email, code } = req.body;
 
@@ -71,7 +69,7 @@ router.post("/verify-email", async (req, res) => {
   }
 });
 
-// ✅ Resend Confirmation Code
+// Resend Confirmation Code
 router.post("/resend-code", async (req, res) => {
   const { email } = req.body;
 
@@ -92,7 +90,7 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
-// ✅ Login
+// Login
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -115,7 +113,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Refresh JWT After Profile Update
+// Refresh JWT After Profile Update
 router.post("/refresh-token", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -131,7 +129,7 @@ router.post("/refresh-token", async (req, res) => {
   }
 });
 
-// ✅ Forgot Password
+// Forgot Password
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
@@ -152,7 +150,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// ✅ Reset Password
+// Reset Password
 router.post("/reset-password/:token", async (req, res) => {
   const { password } = req.body;
 
@@ -181,5 +179,5 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-// ✅ Export router
+
 export default router;

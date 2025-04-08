@@ -1,15 +1,13 @@
-// models/Post.js
-
 import mongoose from 'mongoose';
 
-// ✅ Define Reply Schema
+// Define Reply Schema
 const ReplySchema = new mongoose.Schema({
   text: { type: String, required: true },
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
-// ✅ Define Comment Schema (includes replies)
+// Define Comment Schema (includes replies)
 const CommentSchema = new mongoose.Schema({
   text: { type: String, required: true },
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -17,7 +15,7 @@ const CommentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-// ✅ Define Post Schema
+// Define Post Schema
 const PostSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -42,6 +40,6 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// ✅ Export Post model
+// Export Post model for admin.js
 const Post = mongoose.model("Post", PostSchema);
 export default Post;

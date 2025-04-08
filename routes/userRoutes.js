@@ -1,5 +1,3 @@
-// routes/userRoutes.js
-
 import express from 'express';
 import multer from 'multer';
 import User from '../models/user.js';
@@ -8,7 +6,7 @@ import verifyToken from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// ✅ Configure storage for profile pictures
+// Configure storage for profile pictures
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -20,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Get user profile and activity
+// Get user profile and activity
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -80,7 +78,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ✅ Update user profile
+// Update user profile
 router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) => {
   if (req.user.id !== req.params.id) {
     return res.status(403).json({ message: "Unauthorized: You can only update your own profile" });
@@ -107,5 +105,4 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
   }
 });
 
-// ✅ Export router
 export default router;

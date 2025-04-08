@@ -1,5 +1,3 @@
-// routes/postRoutes.js
-
 import express from 'express';
 import multer from 'multer';
 import Post from '../models/Post.js';
@@ -8,7 +6,7 @@ import uploadMusic from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
-// ✅ Configure Storage for Post Images & Music
+// Configure Storage for Post Images & Music
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.mimetype.startsWith("audio/")) {
@@ -24,23 +22,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// ✅ Create a new post (Now Includes Normalized Category)
+// Create a new post
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
   let { title, content, category } = req.body;
 
   try {
-    // ✅ Normalize category
+    // Normalize category
     if (category) {
       category = category.trim().toLowerCase().replace(/\s+/g, " ");
       category = category.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
     }
 
-    const baseUrl = req.protocol + "://" + req.get("host"); // ✅ Dynamically get correct base URL
+    const baseUrl = req.protocol + "://" + req.get("host"); // Dynamically get correct base URL
 
     const newPost = new Post({
       title,
       content,
-      category, // ✅ Use the normalized version here
+      category, // Use the normalized version here
       author: req.user.id,
       image: req.files["image"]
         ? `${baseUrl}/uploads/${req.files["image"][0].filename}`
@@ -58,7 +56,19 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
 });
 
 
-// ✅ Get all posts with optional filters
+// Get posts under unique categories
+router.get("/categories", async (req, res) => {
+  try {
+    const categories = await Post.distinct("category");
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+// Get all posts with optional filters
 router.get("/", async (req, res) => {
   try {
     const { search, category } = req.query;
@@ -88,7 +98,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Get single post by ID & increment views
+// Get single post by ID & increment views
 router.get("/:id", async (req, res) => {
   try {
     const post = await Post.findByIdAndUpdate(
@@ -105,7 +115,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ✅ Update post (owner only)
+// Update post (owner only)
 router.put("/:id", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -125,7 +135,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Delete post (owner only)
+// Delete post (owner only)
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -142,7 +152,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Rate a post
+// Rate a post
 router.post("/:id/rate", verifyToken, async (req, res) => {
   try {
     const { rating } = req.body;
@@ -167,7 +177,7 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Get average rating
+// Get average rating
 router.get("/:id/ratings", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -184,7 +194,7 @@ router.get("/:id/ratings", async (req, res) => {
   }
 });
 
-// ✅ Get user's rating for post
+// Get user's rating for post
 router.get("/:id/my-rating", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -198,7 +208,7 @@ router.get("/:id/my-rating", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Get trending posts (by views)
+//  Get trending posts (by views)
 router.get("/trending/posts", async (req, res) => {
   try {
     const trendingPosts = await Post.find()
@@ -212,5 +222,5 @@ router.get("/trending/posts", async (req, res) => {
   }
 });
 
-// ✅ Export router
+
 export default router;

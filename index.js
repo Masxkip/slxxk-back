@@ -1,27 +1,22 @@
-// index.js (ESM version)
-
 import dotenv from 'dotenv';
 dotenv.config();
-
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 
-
-// Import routes
+// Import Routes
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
-
 import { adminJs, adminRouter } from './admin.js';
 
-// Import middleware
+
 import verifyToken from './middleware/authMiddleware.js';
+
 
 const app = express();
 
-// Middleware
 app.use(express.json());
 
 app.use(cors({
@@ -30,16 +25,13 @@ app.use(cors({
   credentials: true
 }));
 
-// Routes
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/comments", commentRoutes);
-
-
-
-// Static file serving
 app.use("/uploads", express.static("uploads"));
+
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -50,7 +42,7 @@ mongoose.connect(process.env.MONGO_URI, {
   console.log("✅ MongoDB Connected Successfully");
 
   app.use(adminJs.options.rootPath, adminRouter);
-  console.log("✅ AdminJS mounted at", adminJs.options.rootPath); // Add this
+  console.log("✅ AdminJS mounted at", adminJs.options.rootPath);
 })
 .catch((err) => console.error("❌ MongoDB Connection Error:", err));
 

@@ -1,17 +1,15 @@
-// admin.js
-
 import AdminJS from 'adminjs';
 import AdminJSExpress from '@adminjs/express';
-import * as AdminJSMongoose from '@adminjs/mongoose'; // ✅ fixed
+import * as AdminJSMongoose from '@adminjs/mongoose';
 import mongoose from 'mongoose';
 import User from './models/user.js';
 import Post from './models/Post.js';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
-// ✅ Configure AdminJS
+// Configure AdminJS
 const adminJs = new AdminJS({
-  databases: [mongoose], // You can also list models separately
+  databases: [mongoose],
   rootPath: '/admin',
   resources: [
     {
@@ -24,7 +22,7 @@ const adminJs = new AdminJS({
               const { record } = context;
     
               const user = await User.findById(record.params._id);
-              if (user) await user.remove(); // ✅ This triggers your pre('remove') hook              
+              if (user) await user.remove();             
     
               return {
                 record: record.toJSON(),
@@ -68,22 +66,22 @@ const adminJs = new AdminJS({
               edit: false,
             },
           },
-          // ✅ Comment setup
+          // Comment setup
       'comments': { isVisible: true },
       'comments.text': { isVisible: true },
       'comments.author': {
         isVisible: true,
-        reference: 'User', // 💡 This enables AdminJS's auto-populate
+        reference: 'User', // This enables AdminJS's auto-populate
       },
       
           'comments.createdAt': { isVisible: true },
 
-           // ✅ Replies setup
+           // Replies setup
       'comments.replies': { isVisible: true },
       'comments.replies.text': { isVisible: true },
       'comments.replies.author': {
         isVisible: true,
-        reference: 'User', // 💡 Populate reply author as well
+        reference: 'User', // Populate reply author as well
       },
 
       'comments.replies.createdAt': { isVisible: true },
@@ -110,7 +108,7 @@ const adminJs = new AdminJS({
   },
 });
 
-// ✅ Admin Auth - Basic login setup
+// Admin Auth - Basic login setup
 const ADMIN = {
   email: process.env.ADMIN_EMAIL,
   password: process.env.ADMIN_PASSWORD,

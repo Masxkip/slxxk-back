@@ -1,15 +1,13 @@
-// middleware/uploadMiddleware.js
-
 import fs from 'fs';
 import multer from 'multer';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-// ✅ Emulate __dirname for ESM
+// Emulate __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// ✅ Ensure uploads/music/ directory exists
+// Ensure uploads/music/ directory exists
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, "../uploads/music/");
@@ -25,7 +23,7 @@ const storage = multer.diskStorage({
   }
 });
 
-// ✅ File filter: Only allow MP3 files
+// File filter: Only allow MP3 files
 const fileFilter = (req, file, cb) => {
   console.log("🔍 File MIME Type Detected:", file.mimetype);
 

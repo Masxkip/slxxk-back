@@ -1,7 +1,4 @@
-// models/user.js
-
 import mongoose from 'mongoose';
-import Post from './Post.js';
 
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -18,17 +15,8 @@ const UserSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// ✅ Attach cascade deletion hook BEFORE exporting the model
-UserSchema.pre('remove', async function (next) {
-  try {
-    await Post.deleteMany({ author: this._id });
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
 
-// ✅ Now define the model
+// Now define the model for admin.js
 const User = mongoose.model("User", UserSchema);
 
 export default User;
