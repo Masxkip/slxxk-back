@@ -56,7 +56,6 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
 });
 
 
-// Get posts under unique categories
 router.get("/categories", async (req, res) => {
   try {
     const categories = await Post.distinct("category");
@@ -66,6 +65,7 @@ router.get("/categories", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 // Get all posts with optional filters
