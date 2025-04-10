@@ -3,8 +3,9 @@ import multer from 'multer';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import uploadMusic from '../middleware/uploadMiddleware.js';
-const { v2: cloudinary } = require("cloudinary");
-const fs = require("fs");
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+
 
 const router = express.Router();
 

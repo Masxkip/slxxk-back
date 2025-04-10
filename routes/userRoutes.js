@@ -3,8 +3,9 @@ import multer from 'multer';
 import User from '../models/user.js';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
-const fs = require("fs");
-const { v2: cloudinary } = require("cloudinary");
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+
 
 
 
