@@ -3,6 +3,10 @@ import multer from 'multer';
 import User from '../models/user.js';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
+const fs = require("fs");
+const { v2: cloudinary } = require("cloudinary");
+
+
 
 const router = express.Router();
 
@@ -78,30 +82,36 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update user profile
+
+// ✅ Update user profile
 router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) => {
   if (req.user.id !== req.params.id) {
-    return res.status(403).json({ message: "Unauthorized: You can only update your own profile" });
+      return res.status(403).json({ message: "Unauthorized: You can only update your own profile" });
   }
 
   try {
-    const { username, bio, location, website } = req.body;
+      const { username, bio, location, website } = req.body;
+      let updateData = { username, bio, location, website };
 
-    let updateData = { username, bio, location, website };
+      // ✅ Upload profile picture to Cloudinary
+      if (req.file) {
+          const result = await cloudinary.uploader.upload(req.file.path, {
+              folder: "profile_pics",
+              resource_type: "image",
+          });
+          updateData.profilePicture = result.secure_url;
+          fs.unlinkSync(req.file.path); // delete the file after upload
+      }
 
-    if (req.file) {
-      updateData.profilePicture = `/uploads/${req.file.filename}`;
-    }
+      const updatedUser = await User.findByIdAndUpdate(
+          req.params.id,
+          { $set: updateData },
+          { new: true }
+      ).select("-password");
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { $set: updateData },
-      { new: true }
-    ).select("-password");
-
-    res.status(200).json({ message: "Profile updated successfully!", user: updatedUser });
+      res.status(200).json({ message: "Profile updated successfully!", user: updatedUser });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
   }
 });
 

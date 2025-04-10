@@ -3,6 +3,8 @@ import multer from 'multer';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import uploadMusic from '../middleware/uploadMiddleware.js';
+const { v2: cloudinary } = require("cloudinary");
+const fs = require("fs");
 
 const router = express.Router();
 
@@ -22,30 +24,49 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Create a new post
+
+
+// ✅ Create a new post (Now Includes Normalized Category)
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
   let { title, content, category } = req.body;
 
   try {
-    // Normalize category
+    // ✅ Normalize category
     if (category) {
       category = category.trim().toLowerCase().replace(/\s+/g, " ");
-      category = category.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+      category = category.replace(/\b\w/g, (char) => char.toUpperCase());
     }
 
-    const baseUrl = req.protocol + "://" + req.get("host"); // Dynamically get correct base URL
+    let imageUrl = null;
+    let musicUrl = null;
+
+    // ✅ Upload image to Cloudinary
+    if (req.files["image"]) {
+      const result = await cloudinary.uploader.upload(req.files["image"][0].path, {
+        folder: "post_images",
+        resource_type: "image",
+      });
+      imageUrl = result.secure_url;
+      fs.unlinkSync(req.files["image"][0].path); // Clean up
+    }
+
+    // ✅ Upload music to Cloudinary
+    if (req.files["music"]) {
+      const result = await cloudinary.uploader.upload(req.files["music"][0].path, {
+        folder: "post_music",
+        resource_type: "auto", // audio/mp3 handled
+      });
+      musicUrl = result.secure_url;
+      fs.unlinkSync(req.files["music"][0].path); // Clean up
+    }
 
     const newPost = new Post({
       title,
       content,
-      category, // Use the normalized version here
+      category,
       author: req.user.id,
-      image: req.files["image"]
-        ? `${baseUrl}/uploads/${req.files["image"][0].filename}`
-        : null,
-      music: req.files["music"]
-        ? `${baseUrl}/uploads/music/${req.files["music"][0].filename}`
-        : null
+      image: imageUrl,
+      music: musicUrl,
     });
 
     await newPost.save();
@@ -54,6 +75,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 router.get("/categories", async (req, res) => {
