@@ -129,7 +129,7 @@ router.post("/refresh-token", async (req, res) => {
   }
 });
 
-// Forgot Password
+// Fo
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
 
