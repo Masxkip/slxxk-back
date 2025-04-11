@@ -27,12 +27,12 @@ const upload = multer({ storage });
 
 
 
-// ✅ Create a new post (Now Includes Normalized Category)
+// Create a new post (Now Includes Normalized Category)
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
   let { title, content, category } = req.body;
 
   try {
-    // ✅ Normalize category
+    // Normalize category
     if (category) {
       category = category.trim().toLowerCase().replace(/\s+/g, " ");
       category = category.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -41,7 +41,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
     let imageUrl = null;
     let musicUrl = null;
 
-    // ✅ Upload image to Cloudinary
+    // Upload image to Cloudinary
     if (req.files["image"]) {
       const result = await cloudinary.uploader.upload(req.files["image"][0].path, {
         folder: "post_images",
@@ -51,7 +51,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
       fs.unlinkSync(req.files["image"][0].path); // Clean up
     }
 
-    // ✅ Upload music to Cloudinary
+    // Upload music to Cloudinary
     if (req.files["music"]) {
       const result = await cloudinary.uploader.upload(req.files["music"][0].path, {
         folder: "post_music",

@@ -3,6 +3,6 @@ import dotenv from "dotenv";
 
 dotenv.config(); // Loads CLOUDINARY_URL from .env
 
-cloudinary.config(); // No need to pass anything if CLOUDINARY_URL exists
+cloudinary.config();
 
 export default cloudinary;

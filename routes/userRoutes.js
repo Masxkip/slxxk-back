@@ -11,7 +11,7 @@ import fs from "fs";
 
 const router = express.Router();
 
-//
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -84,7 +84,7 @@ router.get("/:id", async (req, res) => {
 });
 
 
-// ✅ Update user profile
+//  Update user profile
 router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) => {
   if (req.user.id !== req.params.id) {
       return res.status(403).json({ message: "Unauthorized: You can only update your own profile" });
@@ -94,7 +94,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
       const { username, bio, location, website } = req.body;
       let updateData = { username, bio, location, website };
 
-      // ✅ Upload profile picture to Cloudinary
+      //  Upload profile picture to Cloudinary
       if (req.file) {
           const result = await cloudinary.uploader.upload(req.file.path, {
               folder: "profile_pics",
