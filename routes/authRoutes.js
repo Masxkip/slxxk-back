@@ -40,9 +40,16 @@ router.post("/register", async (req, res) => {
 
 // Confirm Email
 router.post("/verify-email", async (req, res) => {
-  const { code } = req.body;
+  const { email, code } = req.body;
 
   try {
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "User already verified" });
+    }
 
     if (
       user.confirmationCode !== code ||
@@ -50,6 +57,9 @@ router.post("/verify-email", async (req, res) => {
     ) {
       return res.status(400).json({ message: "Invalid or expired code" });
     }
+
+    user.isVerified = true;
+    user.confirmationCode = null;
     user.confirmationCodeExpires = null;
     await user.save();
 
@@ -168,6 +178,5 @@ router.post("/reset-password/:token", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 export default router;
