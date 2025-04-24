@@ -33,7 +33,10 @@ router.post("/register", async (req, res) => {
     await newUser.save();
     await sendConfirmationEmail(email, code);
 
-    res.status(201).json({ message: "User registered! Confirmation code sent to email." });
+    res.status(201).json({ 
+      message: "User registered! Confirmation code sent to email.",
+      email 
+    });    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
