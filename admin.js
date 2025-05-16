@@ -7,7 +7,7 @@ import Post from './models/Post.js';
 
 AdminJS.registerAdapter(AdminJSMongoose);
 
-// Configure AdminJS
+// Configure Admin
 const adminJs = new AdminJS({
   databases: [mongoose],
   rootPath: '/admin',
