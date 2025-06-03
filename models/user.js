@@ -12,7 +12,6 @@ const UserSchema = new mongoose.Schema({
   website: { type: String, default: "" },
   confirmationCode: { type: String, default: null },
   confirmationCodeExpires: { type: Date, default: null },
-  isSubscriber: { type: Boolean, default: false },
   isVerified: { type: Boolean, default: false }
 }, { timestamps: true });
 
