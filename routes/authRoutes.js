@@ -10,7 +10,7 @@ import sendConfirmationEmail from '../utils/sendConfirmationEmail.js';
 
 const router = express.Router();
 
-// Regis
+// Register User
 router.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
   try {
@@ -94,7 +94,7 @@ router.post("/resend-code", async (req, res) => {
   }
 });
 
-// Login
+// Login User
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 

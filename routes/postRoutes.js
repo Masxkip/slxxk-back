@@ -1,6 +1,8 @@
 import express from 'express';
 import multer from 'multer';
 import Post from '../models/Post.js';
+import User from '../models/user.js';
+import jwt from 'jsonwebtoken';
 import verifyToken from '../middleware/authMiddleware.js';
 import uploadMusic from '../middleware/uploadMiddleware.js';
 import { v2 as cloudinary } from "cloudinary";
@@ -30,8 +32,14 @@ const upload = multer({ storage });
 // Create a new post (Now Includes Normalized Category)
 router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" }]), async (req, res) => {
   let { title, content, category } = req.body;
+  isPremium = isPremium === "true" || isPremium === true;
 
   try {
+     // ✅ Prevent non-subscribers from uploading music
+    if (!req.user.isSubscriber && req.files["music"]) {
+      return res.status(403).json({ message: "Only subscribers can upload music." });
+    }
+
     // Normalize category
     if (category) {
       category = category.trim().toLowerCase().replace(/\s+/g, " ");
@@ -61,6 +69,8 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
       fs.unlinkSync(req.files["music"][0].path); // Clean up
     }
 
+
+  
     const newPost = new Post({
       title,
       content,
@@ -68,6 +78,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
       author: req.user.id,
       image: imageUrl,
       music: musicUrl,
+      isPremium,
     });
 
     await newPost.save();
@@ -78,7 +89,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
 });
 
 
-
+// Get all categories
 router.get("/categories", async (req, res) => {
   try {
     const categories = await Post.distinct("category");
@@ -121,6 +132,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 // Get single post by ID & increment views
 router.get("/:id", async (req, res) => {
   try {
@@ -137,6 +149,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Update post (owner only)
 router.put("/:id", verifyToken, async (req, res) => {

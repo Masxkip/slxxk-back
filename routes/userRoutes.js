@@ -3,10 +3,9 @@ import multer from 'multer';
 import User from '../models/user.js';
 import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
+import { subscribeUser, verifySubscription } from "../controllers/userController.js";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-
-
 
 
 const router = express.Router();
@@ -115,5 +114,10 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
       res.status(500).json({ error: error.message });
   }
 });
+
+
+// ✅ Subscription routes
+router.post("/subscribe", verifyToken, subscribeUser); // original fallback
+router.post("/verify-subscription", verifyToken, verifySubscription); // ✅ New secure route
 
 export default router;
