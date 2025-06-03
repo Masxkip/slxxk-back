@@ -5,8 +5,7 @@ import Post from '../models/Post.js';
 import verifyToken from '../middleware/authMiddleware.js';
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
-
-
+import axios from "axios";
 
 
 const router = express.Router();
@@ -113,6 +112,38 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
       res.status(200).json({ message: "Profile updated successfully!", user: updatedUser });
   } catch (error) {
       res.status(500).json({ error: error.message });
+  }
+});
+
+
+// ✅ Paystack subscription verification
+router.post("/verify-subscription", verifyToken, async (req, res) => {
+  const { reference } = req.body;
+
+  if (!reference) {
+    return res.status(400).json({ message: "Transaction reference missing" });
+  }
+
+  try {
+    const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      },
+    });
+
+    if (response.data.data.status !== "success") {
+      return res.status(400).json({ message: "Payment not successful" });
+    }
+
+    // ✅ Mark user as subscribed
+    const user = await User.findById(req.user._id);
+    user.isSubscriber = true;
+    await user.save();
+
+    res.status(200).json({ message: "Subscription verified", user });
+  } catch (error) {
+    console.error("Verification error:", error.message);
+    res.status(500).json({ message: "Verification failed", error: error.message });
   }
 });
 

@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   profilePicture: { type: String, default: "" },
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
+  isSubscriber: { type: Boolean, default: false },
   location: { type: String, default: "" },
   website: { type: String, default: "" },
   confirmationCode: { type: String, default: null },
