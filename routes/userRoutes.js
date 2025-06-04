@@ -116,7 +116,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
 });
 
 
-// ✅ Paystack subscription verification
+// ✅ Paystack subscription verification with customer & subscription code tracking
 router.post("/verify-subscription", verifyToken, async (req, res) => {
   const { reference } = req.body;
 
@@ -125,19 +125,34 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
   }
 
   try {
-    const response = await axios.get(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-      },
-    });
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
 
-    if (response.data.data.status !== "success") {
+    const paystackData = response.data.data;
+
+    if (paystackData.status !== "success") {
       return res.status(400).json({ message: "Payment not successful" });
     }
 
-    // ✅ Mark user as subscribed
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     user.isSubscriber = true;
+    user.subscriptionStart = new Date();
+    user.subscriptionRenewalReminderSent = false;
+
+    // ✅ Save customer code and subscription ID
+    user.paystackCustomerCode = paystackData.customer?.customer_code || null;
+    user.paystackSubscriptionCode = paystackData.subscription || null;
+
     await user.save();
 
     res.status(200).json({ message: "Subscription verified", user });

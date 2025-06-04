@@ -9,6 +9,8 @@ const UserSchema = new mongoose.Schema({
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
   isSubscriber: { type: Boolean, default: false },
+  paystackCustomerCode: { type: String, default: null },
+  paystackSubscriptionCode: { type: String, default: null },
   location: { type: String, default: "" },
   website: { type: String, default: "" },
   confirmationCode: { type: String, default: null },
