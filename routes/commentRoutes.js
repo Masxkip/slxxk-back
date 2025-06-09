@@ -4,7 +4,7 @@ import verifyToken from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Add a new comment
+// Add a new comm
 router.post("/:postId", verifyToken, async (req, res) => {
   const { text } = req.body;
 
