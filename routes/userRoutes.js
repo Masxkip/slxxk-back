@@ -116,7 +116,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
 });
 
 
-// ✅ Paystack subscription verification with customer & subscription code tracking
+// Paystack subscription verification with customer & subscription code tracking
 router.post("/verify-subscription", verifyToken, async (req, res) => {
   const { reference } = req.body;
 
@@ -149,7 +149,7 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
     user.subscriptionStart = new Date();
     user.subscriptionRenewalReminderSent = false;
 
-    // ✅ Save customer code and subscription ID
+    // Save customer code and subscription ID
     user.paystackCustomerCode = paystackData.customer?.customer_code || null;
     user.paystackSubscriptionCode = paystackData.subscription || null;
 
