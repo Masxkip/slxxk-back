@@ -21,7 +21,7 @@ const UserSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-// Now define the model for admin.js
+// Now  model for admin.js
 const User = mongoose.model("User", UserSchema);
 
 export default User;
