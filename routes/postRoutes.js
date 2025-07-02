@@ -252,4 +252,35 @@ router.get("/trending/posts", async (req, res) => {
   }
 });
 
+
+
+// ✅ Protected route: Only subscribers can download music
+router.get("/download-music/:postId", verifyToken, async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const post = await Post.findById(postId);
+    if (!post || !post.music) {
+      return res.status(404).json({ message: "Music not found for this post." });
+    }
+
+    // 🚫 Restrict access to subscribers only
+    if (!req.user.isSubscriber) {
+      return res.status(403).json({ message: "Access denied. Subscription required." });
+    }
+
+    // ✅ If using Cloudinary, redirect to the secure music URL
+    return res.redirect(post.music);
+
+    // 🔁 Alternative (if music stored locally on disk):
+    // const filePath = path.resolve(post.music); // Ensure full path
+    // return res.sendFile(filePath);
+
+  } catch (err) {
+    console.error("Error in music download:", err);
+    res.status(500).json({ message: "Server error while accessing music." });
+  }
+});
+
+
 export default router;
