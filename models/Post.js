@@ -23,13 +23,14 @@ const PostSchema = new mongoose.Schema(
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     image: { type: String },
     music: { type: String },
+
+    // ✅ Add premium flag support
+    isPremium: { type: Boolean, default: false },
+
     category: { type: String, required: true },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     comments: [CommentSchema],
-    views: {
-      type: Number,
-      default: 0
-    },
+    views: { type: Number, default: 0 },
     ratings: [
       {
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -40,6 +41,6 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Export Post model for admin.js
+// Export Post model
 const Post = mongoose.model("Post", PostSchema);
 export default Post;
