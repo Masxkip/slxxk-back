@@ -283,7 +283,7 @@ router.get("/download-music/:postId", verifyToken, async (req, res) => {
 });
 
 
-// ✅ Latest 3 premium posts (newest first)
+//Latest 3 premium posts (newest first)
 router.get("/premium/posts", async (req, res) => {
   try {
     const premiumPosts = await Post.find({ isPremium: true })
