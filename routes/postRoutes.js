@@ -283,19 +283,18 @@ router.get("/download-music/:postId", verifyToken, async (req, res) => {
 });
 
 
-// Route: /api/posts/premium
-router.get("/premium", async (req, res) => {
+// ✅ Latest 3 premium posts (newest first)
+router.get("/premium/posts", async (req, res) => {
   try {
     const premiumPosts = await Post.find({ isPremium: true })
-      .sort({ createdAt: -1 })
-      .limit(4)
-      .populate("author", "username");
+        .sort({ createdAt: -1 })
+        .limit(3)
+        .populate("author", "username");
     res.status(200).json(premiumPosts);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 
 export default router;
