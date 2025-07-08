@@ -112,7 +112,7 @@ router.get("/", async (req, res) => {
       query.category = category;
     }
 
-    const posts = await Post.find(query).populate("author", "username email");
+    const posts = await Post.find(query).populate("author", "username email isSubscriber");
 
     if (!Array.isArray(posts)) {
       return res.status(500).json({ error: "Unexpected response format" });
@@ -131,7 +131,7 @@ router.get("/:id", async (req, res) => {
       req.params.id,
       { $inc: { views: 1 } },
       { new: true }
-    ).populate("author", "username");
+    ).populate("author", "username isSubscriber");
 
     if (!post) return res.status(404).json({ message: "Post not found" });
 
@@ -244,7 +244,7 @@ router.get("/trending/posts", async (req, res) => {
     const trendingPosts = await Post.find()
       .sort({ views: -1 })
       .limit(5)
-      .populate("author", "username");
+      .populate("author", "username isSubscriber")
 
     res.status(200).json(trendingPosts);
   } catch (error) {
@@ -289,7 +289,7 @@ router.get("/premium/posts", async (req, res) => {
     const premiumPosts = await Post.find({ isPremium: true })
         .sort({ createdAt: -1 })
         .limit(3)
-        .populate("author", "username");
+        .populate("author", "username isSubscriber");
     res.status(200).json(premiumPosts);
   } catch (error) {
     res.status(500).json({ error: error.message });
