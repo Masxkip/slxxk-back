@@ -238,7 +238,7 @@ router.get("/:id/my-rating", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ Get trending posts (by views)
+// Get trending posts (by views)
 router.get("/trending/posts", async (req, res) => {
   try {
     const trendingPosts = await Post.find()
