@@ -167,13 +167,44 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
 // Paystack Webhook Route (Test or Live)
 router.post("/paystack/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
   try {
-    const event = JSON.parse(req.body.toString());
-    console.log("🔥 Webhook event received:", event);
+    const secret = process.env.PAYSTACK_SECRET_KEY;
+    const hash = crypto.createHmac('sha512', secret)
+      .update(req.body)
+      .digest('hex');
 
-    res.status(200).send("Received");
+    const signature = req.headers['x-paystack-signature'];
+    if (hash !== signature) {
+      return res.status(401).send('Unauthorized');
+    }
+
+    const event = JSON.parse(req.body.toString());
+    console.log("🔥 Webhook event received:", event.event);
+
+    if (event.event === "charge.success") {
+      const email = event.data?.customer?.email;
+      if (!email) {
+        return res.status(400).send("No email found in webhook");
+      }
+
+      const user = await User.findOne({ email });
+      if (!user) {
+        console.log("⚠️ User not found for webhook email:", email);
+        return res.status(404).send("User not found");
+      }
+
+      user.isSubscriber = true;
+      user.subscriptionStart = new Date();
+      user.paystackCustomerCode = event.data.customer.customer_code;
+      user.paystackSubscriptionCode = event.data.subscription;
+
+      await user.save();
+      console.log("✅ Webhook user updated:", email);
+    }
+
+    return res.status(200).send("Webhook processed");
   } catch (err) {
-    console.error("❌ Error in webhook parsing:", err);
-    res.status(500).send("Error");
+    console.error("❌ Error in webhook:", err);
+    return res.status(500).send("Webhook error");
   }
 });
 
