@@ -6,6 +6,7 @@ import verifyToken from '../middleware/authMiddleware.js';
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 import axios from "axios";
+import crypto from "crypto";
 
 
 const router = express.Router();
@@ -161,5 +162,48 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Verification failed", error: error.message });
   }
 });
+
+
+// Paystack Webhook Route (Test or Live)
+router.post("/paystack/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+
+  const hash = crypto
+    .createHmac("sha512", secret)
+    .update(req.body)
+    .digest("hex");
+
+  if (req.headers['x-paystack-signature'] !== hash) {
+    return res.status(400).send("Invalid signature");
+  }
+
+  const event = JSON.parse(req.body.toString());
+
+  if (event.event === "invoice.payment_success") {
+    const email = event.data.customer.email;
+
+    try {
+      const user = await User.findOne({ email });
+
+      if (user) {
+        user.isSubscriber = true;
+        user.subscriptionStart = new Date();
+        user.subscriptionRenewalReminderSent = false;
+        user.paystackCustomerCode = event.data.customer.customer_code;
+        user.paystackSubscriptionCode = event.data.subscription_code;
+        await user.save();
+      }
+
+      return res.status(200).send("Webhook received and user updated");
+    } catch (err) {
+      console.error("Webhook handling error:", err);
+      return res.status(500).send("Webhook error");
+    }
+  }
+
+  return res.status(200).send("Webhook received");
+});
+
+
 
 export default router;

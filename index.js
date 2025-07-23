@@ -17,6 +17,7 @@ import verifyToken from './middleware/authMiddleware.js';
 
 const app = express();
 
+app.use('/api/use', express.raw({ type: 'application/json' })); // for webhook
 app.use(express.json());
 
 app.use(cors({
