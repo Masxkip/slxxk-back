@@ -285,13 +285,13 @@ router.get("/download-music/:postId", verifyToken, async (req, res) => {
 
 
 
-//Latest 3 premium posts (newest first)
+// ✅ Return ALL premium posts (newest first)
 router.get("/premium/posts", async (req, res) => {
   try {
     const premiumPosts = await Post.find({ isPremium: true })
-        .sort({ createdAt: -1 })
-        .limit(3)
-        .populate("author", "username isSubscriber");
+      .sort({ createdAt: -1 }) // newest first
+      .populate("author", "username isSubscriber");
+      
     res.status(200).json(premiumPosts);
   } catch (error) {
     res.status(500).json({ error: error.message });
