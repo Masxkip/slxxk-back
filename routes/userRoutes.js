@@ -185,31 +185,27 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
 
     const event = JSON.parse(req.body.toString());
     console.log("🔥 Webhook event received:", event.event);
-if (event.event === "invoice.settled") {
-  const email = event.data?.customer?.email;
-  const customerCode = event.data?.customer?.customer_code;
-  const subscriptionCode = event.data?.subscription?.subscription_code;
-  const nextPaymentDate = event.data?.subscription?.next_payment_date;
 
-  if (!email) return res.status(400).send("No email found in webhook");
+    if (event.event === "charge.success") {
+      const email = event.data?.customer?.email;
+      if (!email) {
+        return res.status(400).send("No email found in webhook");
+      }
 
-  const user = await User.findOne({ email });
-  if (!user) {
-    console.log("⚠️ No user found for webhook email:", email);
-    return res.status(404).send("User not found");
-  }
+      const user = await User.findOne({ email });
+      if (!user) {
+        console.log("⚠️ User not found for webhook email:", email);
+        return res.status(404).send("User not found");
+      }
 
-  user.isSubscriber = true;
-  user.subscriptionStart = new Date();
-  user.paystackCustomerCode = customerCode;
-  user.paystackSubscriptionCode = subscriptionCode;
-  user.subscriptionRenewalReminderSent = false;
-  user.subscriptionExpires = nextPaymentDate || null;
+      user.isSubscriber = true;
+      user.subscriptionStart = new Date();
+      user.paystackCustomerCode = event.data.customer.customer_code;
+      user.paystackSubscriptionCode = event.data.subscription;
 
-  await user.save();
-  console.log("✅ Webhook updated user subscription:", email);
-}
-
+      await user.save();
+      console.log("✅ Webhook user updated:", email);
+    }
 
     return res.status(200).send("Webhook processed");
   } catch (err) {
