@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema({
     subscriptionRenewalReminderSent: { type: Boolean, default: false },
     paystackCustomerCode: { type: String },
     paystackSubscriptionCode: { type: String },
+    subscriptionExpires: { type: Date },
   location: { type: String, default: "" },
   website: { type: String, default: "" },
   confirmationCode: { type: String, default: null },
