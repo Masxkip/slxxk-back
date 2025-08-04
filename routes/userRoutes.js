@@ -211,7 +211,7 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
 });
 
 
-// Get current logged-in user using token
+// Get current logged-in 
 router.get("/me", verifyToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
