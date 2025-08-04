@@ -17,8 +17,6 @@ import verifyToken from './middleware/authMiddleware.js';
 
 const app = express();
 
-// BEFORE other JSON routes
-app.use("/api/users/paystack/webhook", express.raw({ type: "application/json" }), userRoutes);
 
 app.use(express.json());
 

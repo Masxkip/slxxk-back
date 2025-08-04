@@ -117,7 +117,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
 });
 
 
-// Paystack subscription verification with customer & subscription code tracking
+// POST /api/users/verify-subscription
 router.post("/verify-subscription", verifyToken, async (req, res) => {
   const { reference } = req.body;
 
@@ -141,7 +141,7 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
       return res.status(400).json({ message: "Payment not successful" });
     }
 
-    // Update user data
+    // Find user and update subscription fields
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -155,7 +155,6 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
 
     await user.save();
 
-    // ✅ Re-fetch latest user after save
     const updatedUser = await User.findById(user._id).select("-password");
 
     res.status(200).json({
@@ -170,7 +169,7 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
 
 
 
-// Paystack Webhook Route (Test or Live)
+// POST /api/users/paystack/webhook
 router.post("/paystack/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
   try {
     const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -188,15 +187,10 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
 
     if (event.event === "charge.success") {
       const email = event.data?.customer?.email;
-      if (!email) {
-        return res.status(400).send("No email found in webhook");
-      }
+      if (!email) return res.status(400).send("No email found in webhook");
 
       const user = await User.findOne({ email });
-      if (!user) {
-        console.log("⚠️ User not found for webhook email:", email);
-        return res.status(404).send("User not found");
-      }
+      if (!user) return res.status(404).send("User not found");
 
       user.isSubscriber = true;
       user.subscriptionStart = new Date();
@@ -207,9 +201,11 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
       console.log("✅ Webhook user updated:", email);
     }
 
+    // You can handle other events like "subscription.disable" or "invoice.failed" later
+
     return res.status(200).send("Webhook processed");
   } catch (err) {
-    console.error("❌ Error in webhook:", err);
+    console.error("❌ Webhook error:", err);
     return res.status(500).send("Webhook error");
   }
 });

@@ -8,17 +8,21 @@ const UserSchema = new mongoose.Schema({
   profilePicture: { type: String, default: "" },
   resetPasswordToken: { type: String, default: null },
   resetPasswordExpires: { type: Date, default: null },
-  isSubscriber: { type: Boolean, default: false },
-    subscriptionStart: { type: Date },
-    subscriptionRenewalReminderSent: { type: Boolean, default: false },
-    paystackCustomerCode: { type: String },
-    paystackSubscriptionCode: { type: String },
   location: { type: String, default: "" },
   website: { type: String, default: "" },
   confirmationCode: { type: String, default: null },
   confirmationCodeExpires: { type: Date, default: null },
-  isVerified: { type: Boolean, default: false }
+  isVerified: { type: Boolean, default: false },
+
+  // ✅ Subscription Fields
+  isSubscriber: { type: Boolean, default: false },
+  subscriptionStart: { type: Date, default: null },
+  paystackCustomerCode: { type: String, default: null },
+  paystackSubscriptionCode: { type: String, default: null },
+  subscriptionRenewalReminderSent: { type: Boolean, default: false },
+
 }, { timestamps: true });
+
 
 
 // Now  model for admin.js
