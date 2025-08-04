@@ -201,6 +201,29 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
       console.log("✅ Webhook user updated:", email);
     }
 
+    // ❌ INVOICE FAILED
+if (event.event === "invoice.failed") {
+  const email = event.data?.customer?.email;
+  const user = await User.findOne({ email });
+  if (user) {
+    user.isSubscriber = false;
+    await user.save();
+    console.log("❌ Subscription payment failed:", email);
+  }
+}
+
+// ⌛ SUBSCRIPTION EXPIRED
+if (event.event === "subscription.expired") {
+  const email = event.data?.customer?.email;
+  const user = await User.findOne({ email });
+  if (user) {
+    user.isSubscriber = false;
+    await user.save();
+    console.log("⚠️ Subscription expired for:", email);
+  }
+}
+
+
     // You can handle other events like "subscription.disable" or "invoice.failed" later
 
     return res.status(200).send("Webhook processed");
