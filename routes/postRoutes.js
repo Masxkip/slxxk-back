@@ -85,6 +85,7 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
   }
 });
 
+
 // ✅ Get all categories
 router.get("/categories", async (req, res) => {
   try {
@@ -95,10 +96,13 @@ router.get("/categories", async (req, res) => {
   }
 });
 
+
 // ✅ Get all posts with optional filters
+// ✅ Paginated GET /api/posts
 router.get("/", async (req, res) => {
   try {
-    const { search, category } = req.query;
+    const { search, category, page = 1, limit = 10 } = req.query;
+
     let query = {};
 
     if (search) {
@@ -112,17 +116,26 @@ router.get("/", async (req, res) => {
       query.category = category;
     }
 
-    const posts = await Post.find(query).populate("author", "username email isSubscriber");
+    const skip = (parseInt(page) - 1) * parseInt(limit);
 
-    if (!Array.isArray(posts)) {
-      return res.status(500).json({ error: "Unexpected response format" });
-    }
+    const posts = await Post.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("author", "username email isSubscriber");
 
-    res.status(200).json(posts);
+    const totalPosts = await Post.countDocuments(query);
+
+    res.status(200).json({
+      posts,
+      hasMore: skip + posts.length < totalPosts,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 // ✅ Get single post by ID + increment views
 router.get("/:id", async (req, res) => {
@@ -140,6 +153,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // ✅ Update post (owner only)
 router.put("/:id", verifyToken, async (req, res) => {
@@ -166,6 +180,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
+
 // ✅ Delete post (owner only)
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
@@ -182,6 +197,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // ✅ Rate a post
 router.post("/:id/rate", verifyToken, async (req, res) => {
@@ -208,6 +224,7 @@ router.post("/:id/rate", verifyToken, async (req, res) => {
   }
 });
 
+
 // ✅ Get average rating
 router.get("/:id/ratings", async (req, res) => {
   try {
@@ -225,6 +242,7 @@ router.get("/:id/ratings", async (req, res) => {
   }
 });
 
+
 // ✅ Get my rating
 router.get("/:id/my-rating", verifyToken, async (req, res) => {
   try {
@@ -237,6 +255,7 @@ router.get("/:id/my-rating", verifyToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // ✅ Get trending posts (by views)
 router.get("/trending/posts", async (req, res) => {
