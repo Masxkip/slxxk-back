@@ -86,6 +86,8 @@ router.post("/", verifyToken, upload.fields([{ name: "image" }, { name: "music" 
 });
 
 
+
+
 // ✅ Get all categories
 router.get("/categories", async (req, res) => {
   try {
@@ -101,7 +103,7 @@ router.get("/categories", async (req, res) => {
 // ✅ Paginated GET /api/posts
 router.get("/", async (req, res) => {
   try {
-    const { search, category, page = 1, limit = 10 } = req.query;
+    const { search, category, page = 1, limit = 7 } = req.query;
 
     let query = {};
 
@@ -134,6 +136,53 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+
+// ✅ In postRoutes.js
+router.get("/by-category", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const categoriesPerPage = parseInt(req.query.limit) || 3;
+
+    // Step 1: Get distinct categories sorted by most recent post date
+    const categoriesWithLatest = await Post.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          latestPostDate: { $max: "$createdAt" }
+        }
+      },
+      { $sort: { latestPostDate: -1 } }
+    ]);
+
+    const totalCategories = categoriesWithLatest.length;
+
+    // Step 2: Paginate categories
+    const paginatedCategories = categoriesWithLatest
+      .slice((page - 1) * categoriesPerPage, page * categoriesPerPage)
+      .map(c => c._id);
+
+    // Step 3: Fetch up to 5 latest posts for each category
+    const categoriesData = [];
+    for (const category of paginatedCategories) {
+      const posts = await Post.find({ category })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("author", "username isSubscriber");
+      categoriesData.push({ category, posts });
+    }
+
+    res.status(200).json({
+      categories: categoriesData,
+      hasMore: page * categoriesPerPage < totalCategories
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 
 
