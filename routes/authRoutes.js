@@ -118,20 +118,30 @@ router.post("/login", async (req, res) => {
 });
 
 // Refresh JWT After Profile Update
+// Replace your current /refresh-token with this minimal, safer version:
 router.post("/refresh-token", async (req, res) => {
   try {
-    const { userId } = req.body;
+    let token = req.header("Authorization") || "";
+    if (token.startsWith("Bearer ")) token = token.slice(7);
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
-    const user = await User.findById(userId);
+    // Verify signature but allow expired tokens (we only need to know it was ours)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+
+    const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user.isVerified) return res.status(401).json({ message: "Email not verified" });
 
-    const token = jwt.sign({ id: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    // Issue a fresh 1h token (same as login)
+    const newToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    res.status(200).json({ token });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    // (Optional) return user to save a /users/me call
+    return res.status(200).json({ token: newToken });
+  } catch (err) {
+    return res.status(401).json({ message: "InvalidToken" });
   }
 });
+
 
 // Forgot Password
 router.post("/forgot-password", async (req, res) => {
