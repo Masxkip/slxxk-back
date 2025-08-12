@@ -24,11 +24,8 @@ const verifyToken = async (req, res, next) => {
     req.user = user; // Set the latest user in request
     next();
   } catch (error) {
-  if (error.name === "TokenExpiredError") {
-    return res.status(401).json({ message: "TokenExpired" });
+    return res.status(401).json({ message: "Invalid Token" });
   }
-  return res.status(401).json({ message: "InvalidToken" });
-}
 };
 
 export default verifyToken;
