@@ -1,4 +1,3 @@
-// uploadMiddleware.js
 import multer from 'multer';
 
 // Use memoryStorage to avoid saving files locally

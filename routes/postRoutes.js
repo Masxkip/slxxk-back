@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ---------- Create ----------
+// ---------- Create posts ----------
 router.post(
   "/",
   verifyToken,
@@ -102,12 +102,14 @@ router.get("/categories", async (req, res) => {
   }
 });
 
-// ---------- Paginated list (with filters) ----------
+
+
+// ---------- get all posts Paginated list ----------
+// ---------- get all posts Paginated list ----------
 router.get("/", async (req, res) => {
   try {
-    let { search, category, page = 1, limit = 7 } = req.query;
+    let { search, category, isPremium, page = 1, limit = 7 } = req.query;
 
-    // cap limit
     const MAX_LIMIT = 50;
     page = parseInt(page, 10) || 1;
     limit = Math.min(MAX_LIMIT, parseInt(limit, 10) || 7);
@@ -116,19 +118,23 @@ router.get("/", async (req, res) => {
 
     if (search) {
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
+        { title:   { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } },
       ];
     }
 
     if (category) {
-      // normalize incoming category to match stored format
       const normalized = category
         .trim()
         .toLowerCase()
         .replace(/\s+/g, " ")
         .replace(/\b\w/g, (c) => c.toUpperCase());
       query.category = normalized;
+    }
+
+    // NEW: optional premium filter ("true"/"false")
+    if (typeof isPremium !== "undefined") {
+      query.isPremium = String(isPremium) === "true";
     }
 
     const skip = (page - 1) * limit;
@@ -145,7 +151,7 @@ router.get("/", async (req, res) => {
     res.status(200).json({
       posts,
       hasMore: skip + posts.length < totalPosts,
-      total: totalPosts,
+      total: totalPosts,      // <-- used by frontend for full index
       page,
       limit,
     });
@@ -154,7 +160,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ---------- Trending (specific path BEFORE :id) ----------
+
+// ---------- Trending posts ----------
 router.get("/trending/posts", async (req, res) => {
   try {
     const trendingPosts = await Post.find()
@@ -167,7 +174,7 @@ router.get("/trending/posts", async (req, res) => {
   }
 });
 
-// ---------- Premium (specific path BEFORE :id) ----------
+// ---------- Premium post ----------
 router.get("/premium/posts", async (req, res) => {
   try {
     const premiumPosts = await Post.find({ isPremium: true })
@@ -179,7 +186,7 @@ router.get("/premium/posts", async (req, res) => {
   }
 });
 
-// ---------- Protected music download (specific path BEFORE :id) ----------
+// ---------- Protected music download  ----------
 router.get("/download-music/:postId", verifyToken, async (req, res) => {
   try {
     const { postId } = req.params;
@@ -201,7 +208,7 @@ router.get("/download-music/:postId", verifyToken, async (req, res) => {
   }
 });
 
-// ---------- Get single by id (AFTER specific routes) ----------
+// ---------- Get single by id post ----------
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -224,7 +231,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// ---------- Update ----------
+// ---------- create post update ----------
 router.put("/:id", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -253,7 +260,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ---------- Delete ----------
+// ---------- Delete post ----------
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -272,7 +279,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ---------- Rate ----------
+// ---------- Rate post----------
 router.post("/:id/rate", verifyToken, async (req, res) => {
   try {
     const { rating } = req.body;

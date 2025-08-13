@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/user.js'; // ✅ Import User model
+import User from '../models/user.js';
 
 const verifyToken = async (req, res, next) => {
   let token = req.header("Authorization");
@@ -15,7 +15,7 @@ const verifyToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Fetch fresh user document to get latest subscription state
+    // Fetch fresh user document to get latest subscription state
     const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({ message: "User not found" });

@@ -183,5 +183,5 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-// Export router
+
 export default router;

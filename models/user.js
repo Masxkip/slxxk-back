@@ -14,7 +14,7 @@ const UserSchema = new mongoose.Schema({
   confirmationCodeExpires: { type: Date, default: null },
   isVerified: { type: Boolean, default: false },
 
-  // ✅ Subscription Fields
+  // Subscription Fields
   isSubscriber: { type: Boolean, default: false },
   subscriptionStart: { type: Date, default: null },
   paystackCustomerCode: { type: String, default: null },

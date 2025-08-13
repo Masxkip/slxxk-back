@@ -117,7 +117,7 @@ router.put("/:id", verifyToken, upload.single("profilePic"), async (req, res) =>
 });
 
 
-// POST /api/users/verify-subscription
+// POST /api/users/verify-subscription for paystack
 router.post("/verify-subscription", verifyToken, async (req, res) => {
   const { reference } = req.body;
 
@@ -169,7 +169,7 @@ router.post("/verify-subscription", verifyToken, async (req, res) => {
 
 
 
-// POST /api/users/paystack/webhook
+// POST /api/users/paystack/webhook for paystack
 router.post("/paystack/webhook", express.raw({ type: 'application/json' }), async (req, res) => {
   try {
     const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -183,7 +183,7 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
     }
 
     const event = JSON.parse(req.body.toString());
-    console.log("🔥 Webhook event received:", event.event);
+    console.log(" Webhook event received:", event.event);
 
     if (event.event === "charge.success") {
       const email = event.data?.customer?.email;
@@ -198,28 +198,28 @@ router.post("/paystack/webhook", express.raw({ type: 'application/json' }), asyn
       user.paystackSubscriptionCode = event.data.subscription;
 
       await user.save();
-      console.log("✅ Webhook user updated:", email);
+      console.log(" Webhook user updated:", email);
     }
 
-    // ❌ INVOICE FAILED
+    // INVOICE FAILED
 if (event.event === "invoice.failed") {
   const email = event.data?.customer?.email;
   const user = await User.findOne({ email });
   if (user) {
     user.isSubscriber = false;
     await user.save();
-    console.log("❌ Subscription payment failed:", email);
+    console.log(" Subscription payment failed:", email);
   }
 }
 
-// ⌛ SUBSCRIPTION EXPIRED
+// SUBSCRIPTION EXPIRED
 if (event.event === "subscription.expired") {
   const email = event.data?.customer?.email;
   const user = await User.findOne({ email });
   if (user) {
     user.isSubscriber = false;
     await user.save();
-    console.log("⚠️ Subscription expired for:", email);
+    console.log(" Subscription expired for:", email);
   }
 }
 
@@ -228,12 +228,10 @@ if (event.event === "subscription.expired") {
 
     return res.status(200).send("Webhook processed");
   } catch (err) {
-    console.error("❌ Webhook error:", err);
+    console.error(" Webhook error:", err);
     return res.status(500).send("Webhook error");
   }
 });
-
-
 
 
 // Get current logged-in 
