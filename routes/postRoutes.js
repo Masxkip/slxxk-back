@@ -104,7 +104,7 @@ router.post(
 );
 
 // ---------- Categories ----------
-router.get("/categories", nocache, async (req, res) => {
+router.get("/categories", async (req, res) => {
   try {
     const categories = await Post.distinct("category");
     res.status(200).json(categories);
@@ -117,7 +117,7 @@ router.get("/categories", nocache, async (req, res) => {
 
 // ---------- get all posts Paginated list ----------
 // ---------- get all posts Paginated list ----------
-router.get("/", nocache, async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     let { search, category, isPremium, page = 1, limit = 7 } = req.query;
 
@@ -173,7 +173,7 @@ router.get("/", nocache, async (req, res) => {
 
 
 // ---------- Trending posts ----------
-router.get("/trending/posts", nocache, async (req, res) => {
+router.get("/trending/posts", async (req, res) => {
   try {
     const trendingPosts = await Post.find()
       .sort({ views: -1 })
@@ -186,7 +186,7 @@ router.get("/trending/posts", nocache, async (req, res) => {
 });
 
 // ---------- Premium post ----------
-router.get("/premium/posts", nocache, async (req, res) => {
+router.get("/premium/posts", async (req, res) => {
   try {
     const premiumPosts = await Post.find({ isPremium: true })
       .sort({ createdAt: -1 })
@@ -220,7 +220,7 @@ router.get("/download-music/:postId", verifyToken, async (req, res) => {
 });
 
 // ---------- Get single by id post ----------
-router.get("/:id", nocache, async (req, res) => { 
+router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -291,7 +291,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 });
 
 // ---------- Rate post----------
-router.get("/:id/my-rating", verifyToken, nocache, async (req, res) => { 
+router.post("/:id/rate", verifyToken, async (req, res) => {
   try {
     const { rating } = req.body;
     if (rating < 1 || rating > 5) {
@@ -320,7 +320,7 @@ router.get("/:id/my-rating", verifyToken, nocache, async (req, res) => {
 });
 
 // ---------- Ratings summary ----------
-router.get("/:id/ratings", nocache, async (req, res) => {
+router.get("/:id/ratings", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found." });

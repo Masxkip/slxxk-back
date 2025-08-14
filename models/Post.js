@@ -38,13 +38,6 @@ const PostSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔹 Indexes (put these BEFORE model compilation)
-PostSchema.index({ createdAt: -1 });                 // list/trending sorts
-PostSchema.index({ category: 1, createdAt: -1 });    // category blocks
-PostSchema.index({ isPremium: 1, createdAt: -1 });   // premium filters
-// Optional text search later:
-// PostSchema.index({ title: "text", content: "text" });
-
 // Export Post model
 const Post = mongoose.model("Post", PostSchema);
 export default Post;
